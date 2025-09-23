@@ -54,7 +54,9 @@ Preencher .env com:
 
 Shellenv não tem suporte total. O realce de sintaxe é baseado em Shell.HEDERA_NET=testnetHEDERA_OPERATOR_ID=0.0.xxxxxHEDERA_OPERATOR_KEY=-----BEGIN PRIVATE KEY-----...Mostrar mais linhas
 2. Clonar e rodar Guardian
-Shellgit clone https://github.com/Meeco/hedera-guardian.gitcd hedera-guardiandocker compose -f ./deploy/docker-compose.yml --profile all up -dMostrar mais linhas
+Shellgit clone https://github.com/Meeco/hedera-guardian.gitcd hedera-guardiandocker compose up -d --build
+
+Nota: O build do Docker pode falhar devido a timeouts de rede ao baixar dependências Yarn. Como alternativa, considere usar o modo de desenvolvimento ou instalação manual conforme descrito no README do Guardian. Para este MVP, as operações do Hedera estão validadas e funcionais.Mostrar mais linhas
 3. Acessar interface
 
 Painel disponível em http://localhost:3000
