@@ -1,0 +1,133 @@
+version: '3.8'
+
+services:
+  # MongoDB for Guardian and application data
+  mongodb:
+    image: mongo:5.0
+    container_name: idweb3-mongodb
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: guardian
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: guardian_db
+    volumes:
+      - mongodb_data:/data/db
+      - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    networks:
+      - idweb3-network
+
+  # Redis for caching and session management
+  redis:
+    image: redis:7-alpine
+    container_name: idweb3-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - idweb3-network
+
+  # Guardian Services
+  guardian-db:
+    image: mongo:5.0
+    container_name: guardian-db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: guardian
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: guardian_db
+    volumes:
+      - guardian_db_data:/data/db
+    networks:
+      - idweb3-network
+
+  guardian-service:
+    image: gcr.io/hedera-registry/guardian-service:latest
+    container_name: guardian-service
+    depends_on:
+      - guardian-db
+      - redis
+    environment:
+      GUARDIAN_ENV: docker
+      MONGO_URI: mongodb://guardian:password@guardian-db:27017/guardian_db?authSource=admin
+      REDIS_URI: redis://redis:6379
+      HEDERA_NET: ${HEDERA_NET:-testnet}
+      OPERATOR_ID: ${HEDERA_OPERATOR_ID}
+      OPERATOR_KEY: ${HEDERA_OPERATOR_KEY}
+    ports:
+      - "3002:3002"
+    volumes:
+      - guardian_keys:/app/keys
+      - guardian_configs:/app/configs
+    networks:
+      - idweb3-network
+
+  guardian-ui:
+    image: gcr.io/hedera-registry/guardian-ui:latest
+    container_name: guardian-ui
+    depends_on:
+      - guardian-service
+    environment:
+      GUARDIAN_API_URL: http://guardian-service:3002
+    ports:
+      - "3000:80"
+    networks:
+      - idweb3-network
+
+  # IDweb3 Backend API
+  idweb3-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: idweb3-api
+    depends_on:
+      - mongodb
+      - redis
+      - guardian-service
+    environment:
+      MONGODB_URI: mongodb://guardian:password@mongodb:27017/idweb3?authSource=admin
+      REDIS_URI: redis://redis:6379
+      GUARDIAN_URL: http://guardian-service:3002
+      HEDERA_NET: ${HEDERA_NET:-testnet}
+      HEDERA_OPERATOR_ID: ${HEDERA_OPERATOR_ID}
+      HEDERA_OPERATOR_KEY: ${HEDERA_OPERATOR_KEY}
+      IPFS_API_KEY: ${IPFS_API_KEY}
+      JWT_SECRET: ${JWT_SECRET}
+      NODE_ENV: ${NODE_ENV:-development}
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+    networks:
+      - idweb3-network
+
+  # IDweb3 Frontend (optional extension)
+  idweb3-ui:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: idweb3-ui
+    depends_on:
+      - idweb3-api
+    environment:
+      REACT_APP_API_URL: http://localhost:3001
+      REACT_APP_GUARDIAN_URL: http://localhost:3000
+    ports:
+      - "3003:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - idweb3-network
+
+volumes:
+  mongodb_data:
+  redis_data:
+  guardian_db_data:
+  guardian_keys:
+  guardian_configs:
+
+networks:
+  idweb3-network:
+    driver: bridge
