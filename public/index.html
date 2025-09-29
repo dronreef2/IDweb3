@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IDweb3 - Digital Identity System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 90%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            color: #4a5568;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #718096;
+            font-size: 1.1rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature {
+            padding: 1.5rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+        }
+
+        .feature h3 {
+            color: #4a5568;
+            margin-bottom: 1rem;
+        }
+
+        .feature p {
+            color: #718096;
+        }
+
+        .api-section {
+            background: #f7fafc;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        .api-section h3 {
+            color: #4a5568;
+            margin-bottom: 1rem;
+        }
+
+        .endpoint {
+            background: white;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 0.5rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .endpoint code {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .status {
+            background: #f0fff4;
+            border: 1px solid #9ae6b4;
+            padding: 1rem;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .status.error {
+            background: #fed7d7;
+            border-color: #fc8181;
+        }
+
+        .btn {
+            background: #667eea;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #5a67d8;
+        }
+
+        .footer {
+            text-align: center;
+            color: #718096;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌐 IDweb3</h1>
+            <p>Digital Identity System with Hedera + Guardian</p>
+        </div>
+
+        <div id="status" class="status">
+            <p>🔄 Checking API status...</p>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <h3>🆔 Digital Identity</h3>
+                <p>Create unique digital identities backed by blockchain technology</p>
+            </div>
+            <div class="feature">
+                <h3>📜 Verifiable Credentials</h3>
+                <p>Issue and manage tamper-proof digital credentials</p>
+            </div>
+            <div class="feature">
+                <h3>✍️ Document Signing</h3>
+                <p>Secure document signing with immutable blockchain records</p>
+            </div>
+            <div class="feature">
+                <h3>🔗 Hedera Integration</h3>
+                <p>Leverages Hedera Hashgraph for scalable consensus</p>
+            </div>
+        </div>
+
+        <div class="api-section">
+            <h3>🔌 API Endpoints</h3>
+            <div class="endpoint">
+                <code>GET /api/v1/health</code> - API Health Check
+            </div>
+            <div class="endpoint">
+                <code>POST /api/v1/auth/register</code> - User Registration
+            </div>
+            <div class="endpoint">
+                <code>POST /api/v1/identity</code> - Create Digital Identity
+            </div>
+            <div class="endpoint">
+                <code>POST /api/v1/documents/sign</code> - Sign Documents
+            </div>
+        </div>
+
+        <div style="text-align: center;">
+            <button class="btn" onclick="testAPI()">Test API Connection</button>
+        </div>
+
+        <div class="footer">
+            <p>Built with Node.js, TypeScript, MongoDB, Redis, and Hedera SDK</p>
+            <p>View the <a href="https://github.com/dronreef2/IDweb3" style="color: #667eea;">source code on GitHub</a></p>
+        </div>
+    </div>
+
+    <script>
+        async function checkAPIStatus() {
+            try {
+                const response = await fetch('/api/v1/health');
+                const data = await response.json();
+                
+                const statusDiv = document.getElementById('status');
+                if (data.success) {
+                    statusDiv.className = 'status';
+                    statusDiv.innerHTML = `
+                        <p>✅ API is running successfully!</p>
+                        <p>Version: ${data.version}</p>
+                    `;
+                } else {
+                    throw new Error('API returned error');
+                }
+            } catch (error) {
+                const statusDiv = document.getElementById('status');
+                statusDiv.className = 'status error';
+                statusDiv.innerHTML = `
+                    <p>❌ API is not responding</p>
+                    <p>Make sure the server is running on the correct port</p>
+                `;
+            }
+        }
+
+        function testAPI() {
+            checkAPIStatus();
+        }
+
+        // Check API status on page load
+        window.addEventListener('load', checkAPIStatus);
+    </script>
+</body>
+</html>
