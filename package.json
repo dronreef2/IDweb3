@@ -1,0 +1,44 @@
+{
+  "name": "idweb3",
+  "version": "1.0.0",
+  "description": "Digital Identity MVP with Hedera, Guardian, and EVM support",
+  "main": "index.js",
+  "scripts": {
+    "compile": "npx hardhat compile",
+    "deploy:local": "npx hardhat run scripts/deploy.js --network hardhat",
+    "deploy:sepolia": "npx hardhat run scripts/deploy.js --network sepolia",
+    "deploy:hedera": "npx hardhat run scripts/deploy.js --network hederaTestnet",
+    "test": "npx hardhat test",
+    "clean": "npx hardhat clean",
+    "node": "npx hardhat node",
+    "copy-abi": "cp artifacts/contracts/IdentityNFT.sol/IdentityNFT.json frontend/src/contracts/",
+    "setup": "./setup.sh",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down",
+    "docker:logs": "docker-compose logs -f"
+  },
+  "keywords": [
+    "hedera",
+    "guardian",
+    "digital-identity",
+    "blockchain",
+    "hardhat",
+    "evm",
+    "nft",
+    "credentials",
+    "web3"
+  ],
+  "author": "IDweb3 Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^3.0.0",
+    "@openzeppelin/contracts": "^4.9.3",
+    "hardhat": "^2.17.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

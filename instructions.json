@@ -1,0 +1,698 @@
+{
+  "project": {
+    "name": "IDweb3",
+    "type": "Digital Identity MVP",
+    "status": "MVP_COMPLETE",
+    "version": "1.0.0",
+    "description": "Sistema completo de identidade digital com emissão de credenciais verificáveis (W3C), integração com Hedera Hashgraph, armazenamento IPFS e UI em React.",
+    "repository": "https://github.com/dronreef2/IDweb3",
+    "objectives": [
+      "Permitir criação de identidade digital com NFT ou VC",
+      "Emitir e validar credenciais verificáveis via Guardian Framework",
+      "Garantir integridade documental com IPFS + Blockchain",
+      "Facilitar deploy local e testnet com Docker e Hardhat",
+      "Fornecer API REST completa para integrações externas"
+    ]
+  },
+  
+  "architecture": {
+    "backend": {
+      "stack": ["Node.js", "Express", "MongoDB", "Redis"],
+      "version": "Node.js >= 16.0.0",
+      "main_file": "backend/src/server.js",
+      "api_endpoints": [
+        {
+          "path": "/api/auth/register",
+          "method": "POST",
+          "description": "Registrar novo usuário",
+          "requires_auth": false
+        },
+        {
+          "path": "/api/auth/login",
+          "method": "POST",
+          "description": "Autenticar usuário e retornar JWT",
+          "requires_auth": false
+        },
+        {
+          "path": "/api/identity/create",
+          "method": "POST",
+          "description": "Criar nova identidade digital",
+          "requires_auth": true
+        },
+        {
+          "path": "/api/identity/me",
+          "method": "GET",
+          "description": "Obter identidade do usuário autenticado",
+          "requires_auth": true
+        },
+        {
+          "path": "/api/identity/issue-nft",
+          "method": "POST",
+          "description": "Emitir NFT de identidade no Hedera",
+          "requires_auth": true
+        },
+        {
+          "path": "/api/credentials/issue",
+          "method": "POST",
+          "description": "Emitir credencial verificável",
+          "requires_auth": true
+        },
+        {
+          "path": "/api/credentials/my-credentials",
+          "method": "GET",
+          "description": "Listar credenciais do usuário",
+          "requires_auth": true
+        },
+        {
+          "path": "/api/documents/upload",
+          "method": "POST",
+          "description": "Upload de documento para IPFS",
+          "requires_auth": true
+        },
+        {
+          "path": "/api/documents/list",
+          "method": "GET",
+          "description": "Listar documentos do usuário",
+          "requires_auth": true
+        }
+      ],
+      "notes": "API REST principal do sistema IDweb3. Fornece autenticação JWT e rotas para identidade, credenciais e documentos."
+    },
+    
+    "frontend": {
+      "stack": ["React 18", "Material UI", "Axios", "Ethers.js"],
+      "version": "React ^18.2.0",
+      "url_local": "http://localhost:3003",
+      "url_dev": "http://localhost:3000",
+      "main_file": "frontend/src/App.js",
+      "integration": "Conecta à API REST e ao contrato NFT via MetaMask.",
+      "key_components": [
+        {
+          "name": "App.js",
+          "description": "Componente principal com verificação de status da API"
+        },
+        {
+          "name": "utils/contract.js",
+          "description": "Utilitários para interação com smart contracts EVM",
+          "status": "to_be_created"
+        },
+        {
+          "name": "services/api.js",
+          "description": "Cliente Axios para comunicação com backend",
+          "status": "to_be_created"
+        }
+      ]
+    },
+    
+    "blockchain": {
+      "primary_network": "Hedera Hashgraph",
+      "testnet": "Hedera Testnet",
+      "sdk": "@hashgraph/sdk v2.40.0",
+      "features": [
+        "Consensus Service (HCS) para registro de identidades",
+        "Token Service (HTS) para NFTs de identidade",
+        "File Service para armazenamento on-chain"
+      ],
+      "contract_support": {
+        "enabled": true,
+        "type": "EVM-compatible",
+        "tool": "Hardhat",
+        "networks": ["Sepolia", "Hedera EVM"]
+      },
+      "extensions": {
+        "identity_nft": {
+          "contract_name": "IdentityNFT",
+          "file": "contracts/IdentityNFT.sol",
+          "standard": "ERC721",
+          "functions": [
+            {
+              "name": "mintIdentity",
+              "params": ["address to", "string metadataURI"],
+              "returns": "uint256 tokenId",
+              "description": "Emite um novo NFT de identidade para o endereço especificado"
+            },
+            {
+              "name": "tokenURI",
+              "params": ["uint256 tokenId"],
+              "returns": "string",
+              "description": "Retorna o URI de metadados IPFS do NFT"
+            }
+          ],
+          "networks": ["Sepolia (EVM)", "Hedera EVM"],
+          "notes": "Permite emissão de NFTs de identidade vinculados a usuários IDweb3."
+        }
+      }
+    },
+    
+    "storage": {
+      "type": "IPFS",
+      "integration": "Upload e verificação de documentos via API /api/documents",
+      "providers": ["Web3.Storage", "Filebase", "IPFS HTTP Client"],
+      "sdk": "ipfs-http-client v56.0.1",
+      "use_cases": [
+        "Armazenamento de metadados de identidade",
+        "Upload de documentos de verificação",
+        "Metadata URI para NFTs"
+      ]
+    },
+    
+    "identity_framework": {
+      "name": "Guardian Framework",
+      "version": "Latest",
+      "url": "http://localhost:3000",
+      "api_url": "http://localhost:3002",
+      "features": [
+        "Emissão de Verifiable Credentials (W3C)",
+        "Gerenciamento de políticas de identidade",
+        "Registro de DIDs (Decentralized Identifiers)",
+        "Verificação de credenciais"
+      ]
+    }
+  },
+  
+  "setup": {
+    "prerequisites": [
+      "Docker e Docker Compose instalados",
+      "Node.js >= 16.0.0",
+      "npm ou yarn",
+      "MetaMask (para interação com contratos)",
+      "Conta Hedera Testnet (gratuita)",
+      "Infura API key (opcional, para Sepolia)"
+    ],
+    
+    "installation_steps": [
+      {
+        "step": 1,
+        "title": "Clonar repositório",
+        "command": "git clone https://github.com/dronreef2/IDweb3.git && cd IDweb3",
+        "description": "Obter código-fonte do projeto"
+      },
+      {
+        "step": 2,
+        "title": "Configurar ambiente",
+        "command": "cp .env.example .env",
+        "description": "Criar arquivo de configuração a partir do exemplo"
+      },
+      {
+        "step": 3,
+        "title": "Editar variáveis de ambiente",
+        "file": ".env",
+        "required_vars": [
+          "HEDERA_OPERATOR_ID",
+          "HEDERA_OPERATOR_KEY",
+          "MONGODB_URI",
+          "REDIS_URL",
+          "JWT_SECRET"
+        ],
+        "description": "Configurar credenciais Hedera e outras variáveis"
+      },
+      {
+        "step": 4,
+        "title": "Executar setup",
+        "command": "./setup.sh",
+        "description": "Inicializar todos os serviços via Docker Compose"
+      },
+      {
+        "step": 5,
+        "title": "Verificar serviços",
+        "commands": [
+          "curl http://localhost:3001/health",
+          "docker-compose ps"
+        ],
+        "expected": "API retorna status OK e todos os containers estão running"
+      }
+    ],
+    
+    "docker_services": {
+      "api": {
+        "url": "http://localhost:3001",
+        "description": "Backend API REST",
+        "health_check": "/health"
+      },
+      "frontend": {
+        "url": "http://localhost:3003",
+        "description": "Interface React do usuário"
+      },
+      "guardian": {
+        "url": "http://localhost:3000",
+        "description": "Guardian Framework UI"
+      },
+      "mongo": {
+        "port": 27017,
+        "description": "MongoDB database"
+      },
+      "redis": {
+        "port": 6379,
+        "description": "Redis cache"
+      }
+    }
+  },
+  
+  "hardhat_integration": {
+    "purpose": "Adicionar suporte a contratos EVM para NFTs de identidade e extensões Web3",
+    "installation": [
+      {
+        "step": 1,
+        "title": "Instalar Hardhat e dependências",
+        "command": "npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox @openzeppelin/contracts",
+        "description": "Instalar framework Hardhat e bibliotecas necessárias"
+      },
+      {
+        "step": 2,
+        "title": "Inicializar Hardhat",
+        "command": "npx hardhat init",
+        "options": "Escolher 'Create a JavaScript project'"
+      },
+      {
+        "step": 3,
+        "title": "Criar contrato IdentityNFT",
+        "file": "contracts/IdentityNFT.sol",
+        "content_type": "Solidity Smart Contract",
+        "standard": "ERC721",
+        "description": "Contrato para emissão de NFTs de identidade"
+      },
+      {
+        "step": 4,
+        "title": "Criar script de deploy",
+        "file": "scripts/deploy.js",
+        "description": "Script automatizado para deploy do contrato"
+      },
+      {
+        "step": 5,
+        "title": "Configurar redes",
+        "file": "hardhat.config.js",
+        "networks": ["hardhat", "sepolia", "hederaTestnet"]
+      }
+    ],
+    
+    "deployment": {
+      "local": {
+        "command": "npx hardhat run scripts/deploy.js --network hardhat",
+        "description": "Deploy em rede local para testes",
+        "gas_required": false
+      },
+      "sepolia": {
+        "command": "npx hardhat run scripts/deploy.js --network sepolia",
+        "description": "Deploy em Ethereum Sepolia testnet",
+        "gas_required": true,
+        "faucet": "https://sepoliafaucet.com"
+      },
+      "hedera": {
+        "command": "npx hardhat run scripts/deploy.js --network hederaTestnet",
+        "description": "Deploy em Hedera EVM testnet",
+        "gas_required": true,
+        "faucet": "https://portal.hedera.com/register"
+      }
+    },
+    
+    "expected_output": {
+      "success": "✅ IdentityNFT deployed at: 0x<ADDRESS>",
+      "next_steps": [
+        "Salvar endereço do contrato no .env",
+        "Atualizar REACT_APP_NFT_CONTRACT_ADDRESS",
+        "Copiar ABI para frontend/src/contracts/"
+      ]
+    }
+  },
+  
+  "frontend_integration": {
+    "goal": "Conectar interface React aos smart contracts EVM",
+    
+    "files_to_create": [
+      {
+        "path": "frontend/src/utils/contract.js",
+        "purpose": "Utilitários para interação com contratos via ethers.js",
+        "exports": [
+          "getContract() - Conecta ao contrato NFT",
+          "mintIdentityNFT(metadataURI) - Emite NFT de identidade",
+          "getTokenCounter() - Obtém contador de tokens",
+          "hasIdentityNFT(address) - Verifica se usuário possui NFT"
+        ]
+      },
+      {
+        "path": "frontend/src/services/api.js",
+        "purpose": "Cliente Axios para comunicação com backend REST",
+        "exports": [
+          "createIdentity(data) - Criar identidade",
+          "uploadDocument(file) - Upload de documento",
+          "getMyCredentials() - Listar credenciais",
+          "login(credentials) - Autenticar usuário",
+          "register(userData) - Registrar novo usuário"
+        ]
+      },
+      {
+        "path": "frontend/src/contracts/IdentityNFT.json",
+        "purpose": "ABI do contrato IdentityNFT",
+        "source": "artifacts/contracts/IdentityNFT.sol/IdentityNFT.json",
+        "note": "Copiar após compilação do Hardhat"
+      }
+    ],
+    
+    "integration_example": {
+      "component": "Dashboard.jsx",
+      "actions": [
+        "Conectar MetaMask (window.ethereum)",
+        "Verificar se usuário possui NFT de identidade",
+        "Chamar função mintIdentity() via botão na interface",
+        "Exibir hash da transação e link para explorer"
+      ],
+      "code_pattern": "const { contract, signer } = await getContract(); const tx = await contract.mintIdentity(address, metadataURI);"
+    },
+    
+    "environment_variables": {
+      "REACT_APP_API_URL": {
+        "description": "URL base da API backend",
+        "default": "http://localhost:3001/api",
+        "required": true
+      },
+      "REACT_APP_NFT_CONTRACT_ADDRESS": {
+        "description": "Endereço do contrato IdentityNFT deployado",
+        "example": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
+        "required": true
+      }
+    }
+  },
+  
+  "faucet_usage": {
+    "purpose": "Obter tokens de teste (ETH ou HBAR) para pagar gas fees em testnets",
+    
+    "networks": [
+      {
+        "name": "Ethereum Sepolia",
+        "token": "ETH",
+        "faucets": [
+          {
+            "url": "https://sepoliafaucet.com",
+            "provider": "Alchemy",
+            "requirements": "Conta Alchemy gratuita"
+          },
+          {
+            "url": "https://faucets.chain.link/sepolia",
+            "provider": "Chainlink",
+            "requirements": "Conexão com wallet"
+          }
+        ],
+        "instructions": [
+          "1. Acesse a faucet escolhida",
+          "2. Cole o endereço público da sua carteira MetaMask",
+          "3. Aguarde 1-2 minutos para receber os tokens",
+          "4. Verifique o saldo no MetaMask ou Etherscan",
+          "5. Confirme saldo antes de executar deploy"
+        ]
+      },
+      {
+        "name": "Hedera Testnet",
+        "token": "HBAR",
+        "faucets": [
+          {
+            "url": "https://portal.hedera.com/register",
+            "provider": "Hedera Official",
+            "requirements": "Registro de conta testnet"
+          }
+        ],
+        "instructions": [
+          "1. Acesse o portal Hedera",
+          "2. Registre uma conta testnet (gratuita)",
+          "3. Gere credenciais (Account ID e Private Key)",
+          "4. Copie as credenciais para o .env do IDweb3",
+          "5. A conta já vem com saldo inicial de HBAR de teste"
+        ]
+      }
+    ],
+    
+    "validation": {
+      "ethereum": "Verifique saldo com: ethers.provider.getBalance(address)",
+      "hedera": "Verifique no HashScan: https://hashscan.io/testnet"
+    }
+  },
+  
+  "agent_tasks": [
+    {
+      "id": "TASK_001",
+      "name": "DEPLOY_BACKEND",
+      "goal": "Executar setup.sh e validar endpoints REST",
+      "commands": [
+        "./setup.sh",
+        "curl http://localhost:3001/health"
+      ],
+      "validation": {
+        "type": "http_response",
+        "endpoint": "http://localhost:3001/health",
+        "expected_status": 200,
+        "expected_body": {"status": "OK"}
+      },
+      "estimated_time": "2-3 minutos",
+      "dependencies": ["Docker instalado", ".env configurado"]
+    },
+    {
+      "id": "TASK_002",
+      "name": "INSTALL_HARDHAT",
+      "goal": "Instalar e configurar Hardhat para contratos EVM",
+      "commands": [
+        "npm install --save-dev hardhat @nomicfoundation/hardhat-toolbox",
+        "npx hardhat init"
+      ],
+      "validation": {
+        "type": "file_exists",
+        "files": ["hardhat.config.js", "contracts/", "scripts/"]
+      },
+      "estimated_time": "1-2 minutos",
+      "dependencies": ["Node.js instalado"]
+    },
+    {
+      "id": "TASK_003",
+      "name": "CREATE_CONTRACT",
+      "goal": "Criar contrato IdentityNFT.sol",
+      "files_to_create": ["contracts/IdentityNFT.sol"],
+      "validation": {
+        "type": "compilation",
+        "command": "npx hardhat compile",
+        "expected_output": "Compiled 1 Solidity file successfully"
+      },
+      "estimated_time": "1 minuto",
+      "dependencies": ["TASK_002 completa"]
+    },
+    {
+      "id": "TASK_004",
+      "name": "DEPLOY_CONTRACT",
+      "goal": "Realizar deploy do contrato IdentityNFT com Hardhat",
+      "commands": [
+        "npx hardhat run scripts/deploy.js --network sepolia"
+      ],
+      "validation": {
+        "type": "console_output",
+        "expected_pattern": "IdentityNFT deployed at: 0x[a-fA-F0-9]{40}",
+        "save_output": "NFT_CONTRACT_ADDRESS"
+      },
+      "estimated_time": "30-60 segundos",
+      "dependencies": ["TASK_003 completa", "Tokens de faucet disponíveis"]
+    },
+    {
+      "id": "TASK_005",
+      "name": "CONNECT_FRONTEND",
+      "goal": "Integrar front React ao contrato e exibir NFT no painel",
+      "files_to_create": [
+        "frontend/src/utils/contract.js",
+        "frontend/src/services/api.js"
+      ],
+      "validation": {
+        "type": "manual_test",
+        "steps": [
+          "Acessar http://localhost:3003",
+          "Conectar MetaMask",
+          "Clicar em 'Emitir NFT de Identidade'",
+          "Verificar transação confirmada e hash visível"
+        ]
+      },
+      "estimated_time": "3-5 minutos",
+      "dependencies": ["TASK_004 completa", "MetaMask instalado"]
+    },
+    {
+      "id": "TASK_006",
+      "name": "RUN_FAUCET_TEST",
+      "goal": "Confirmar recebimento de tokens de teste antes de deploy",
+      "steps": [
+        "Acessar faucet (Sepolia ou Hedera)",
+        "Solicitar tokens",
+        "Aguardar confirmação",
+        "Verificar saldo"
+      ],
+      "validation": {
+        "type": "balance_check",
+        "minimum_balance": "0.1 ETH ou 10 HBAR"
+      },
+      "estimated_time": "2-5 minutos",
+      "dependencies": ["Carteira MetaMask configurada"]
+    },
+    {
+      "id": "TASK_007",
+      "name": "INTEGRATION_TEST",
+      "goal": "Testar fluxo completo de criação de identidade",
+      "steps": [
+        "Registrar novo usuário via API",
+        "Fazer login e obter JWT",
+        "Criar identidade digital",
+        "Upload de documento para IPFS",
+        "Emitir NFT de identidade",
+        "Verificar registro no blockchain"
+      ],
+      "validation": {
+        "type": "end_to_end",
+        "success_criteria": [
+          "Usuário criado com sucesso",
+          "Identidade registrada no Hedera",
+          "Documento armazenado no IPFS",
+          "NFT emitido e visível no MetaMask"
+        ]
+      },
+      "estimated_time": "5-10 minutos",
+      "dependencies": ["Todas as tasks anteriores completas"]
+    }
+  ],
+  
+  "success_criteria": {
+    "backend_online": {
+      "description": "API retorna status OK",
+      "check": "curl http://localhost:3001/health",
+      "expected": "HTTP 200, {\"status\":\"OK\"}"
+    },
+    "frontend_connected": {
+      "description": "Interface renderiza dados do usuário",
+      "check": "Acessar http://localhost:3003",
+      "expected": "Página carrega sem erros de console"
+    },
+    "blockchain_verified": {
+      "description": "Contrato NFT ativo e interativo",
+      "check": "Chamar função balanceOf do contrato",
+      "expected": "Função retorna valor sem revert"
+    },
+    "document_verified": {
+      "description": "Upload e IPFS hash válidos",
+      "check": "POST /api/documents/upload",
+      "expected": "Resposta contém ipfsHash válido"
+    },
+    "identity_created": {
+      "description": "Identidade criada e registrada",
+      "check": "GET /api/identity/me",
+      "expected": "Resposta contém identityId e hederaTopicId"
+    }
+  },
+  
+  "troubleshooting": {
+    "common_issues": [
+      {
+        "problem": "Insufficient funds for gas",
+        "symptoms": "Erro ao fazer deploy ou mint NFT",
+        "solution": "Use faucet para obter tokens de teste",
+        "links": ["https://sepoliafaucet.com", "https://portal.hedera.com/register"]
+      },
+      {
+        "problem": "MetaMask não conecta",
+        "symptoms": "window.ethereum undefined ou erro de conexão",
+        "solution": "Verifique se está na rede correta (Sepolia ou Hedera Testnet)",
+        "steps": [
+          "Abrir MetaMask",
+          "Selecionar rede apropriada",
+          "Recarregar página"
+        ]
+      },
+      {
+        "problem": "Contrato não encontrado",
+        "symptoms": "Error: call revert exception",
+        "solution": "Confirme o endereço do contrato no .env",
+        "check": "REACT_APP_NFT_CONTRACT_ADDRESS deve conter endereço válido"
+      },
+      {
+        "problem": "API retorna 401",
+        "symptoms": "Unauthorized em requests autenticadas",
+        "solution": "Verifique se o token JWT está sendo enviado no header Authorization",
+        "format": "Authorization: Bearer <token>"
+      },
+      {
+        "problem": "Guardian não responde",
+        "symptoms": "Erro ao conectar com Guardian",
+        "solution": "Aguarde a inicialização completa (~2 minutos) após docker-compose up",
+        "check": "docker-compose logs guardian"
+      },
+      {
+        "problem": "MongoDB connection error",
+        "symptoms": "Cannot connect to MongoDB",
+        "solution": "Verifique se o container mongo está rodando",
+        "commands": [
+          "docker-compose ps",
+          "docker-compose logs mongo"
+        ]
+      }
+    ]
+  },
+  
+  "resources": {
+    "documentation": [
+      {
+        "name": "Hedera Documentation",
+        "url": "https://docs.hedera.com",
+        "description": "Documentação oficial do Hedera Hashgraph"
+      },
+      {
+        "name": "Guardian Framework",
+        "url": "https://docs.hedera.com/guardian",
+        "description": "Guia do Guardian para credenciais verificáveis"
+      },
+      {
+        "name": "Hardhat Docs",
+        "url": "https://hardhat.org/docs",
+        "description": "Documentação completa do Hardhat"
+      },
+      {
+        "name": "OpenZeppelin Contracts",
+        "url": "https://docs.openzeppelin.com/contracts",
+        "description": "Biblioteca de contratos seguros e auditados"
+      },
+      {
+        "name": "Ethers.js",
+        "url": "https://docs.ethers.org",
+        "description": "Biblioteca para interação com Ethereum"
+      }
+    ],
+    
+    "explorers": [
+      {
+        "name": "Hedera Testnet Explorer",
+        "url": "https://hashscan.io/testnet",
+        "description": "Explorador para transações Hedera testnet"
+      },
+      {
+        "name": "Sepolia Explorer",
+        "url": "https://sepolia.etherscan.io",
+        "description": "Explorador para Ethereum Sepolia testnet"
+      }
+    ],
+    
+    "tools": [
+      {
+        "name": "MetaMask",
+        "url": "https://metamask.io",
+        "description": "Carteira Web3 para navegador"
+      },
+      {
+        "name": "Infura",
+        "url": "https://infura.io",
+        "description": "Provedor de nós Ethereum"
+      },
+      {
+        "name": "Web3.Storage",
+        "url": "https://web3.storage",
+        "description": "Armazenamento IPFS gratuito"
+      }
+    ]
+  },
+  
+  "metadata": {
+    "created": "2025-10-12",
+    "version": "1.0.0",
+    "format": "semantic_json",
+    "target_audience": ["AI agents", "Developers", "DevOps engineers"],
+    "language": "pt-BR",
+    "maintained_by": "IDweb3 Team"
+  }
+}
