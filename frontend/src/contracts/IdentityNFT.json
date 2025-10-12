@@ -1,0 +1,5 @@
+{
+  "contractName": "IdentityNFT",
+  "abi": [],
+  "_comment": "This file will be populated after running 'npx hardhat compile'. Copy the file from artifacts/contracts/IdentityNFT.sol/IdentityNFT.json"
+}

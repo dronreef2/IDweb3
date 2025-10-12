@@ -1,0 +1,71 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+
+# Production builds
+/build
+/dist
+frontend/build/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDEs and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+logs/
+*.log
+
+# Testing
+coverage/
+.nyc_output/
+
+# Hardhat
+cache/
+artifacts/
+typechain/
+typechain-types/
+
+# Hardhat artifacts (but keep the ABI in frontend)
+!frontend/src/contracts/IdentityNFT.json
+
+# Local environment files
+.env.hardhat
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Database
+*.db
+*.sqlite
+
+# OS files
+Thumbs.db
+.DS_Store
+
+# Docker volumes
+.docker/
+volumes/
+
+# Guardian files
+guardian-service/
+.guardian/
+
+# Backup files
+*.bak
+*.backup
