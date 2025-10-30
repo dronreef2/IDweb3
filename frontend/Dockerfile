@@ -1,4 +1,4 @@
-FROM node:18-alpine
+FROM node:18-alpine AS builder
 
 WORKDIR /app
 
@@ -17,10 +17,12 @@ RUN npm run build
 
 # Use nginx to serve the app
 FROM nginx:alpine
-COPY --from=0 /app/build /usr/share/nginx/html
 
-# Copy nginx config
-COPY nginx.conf /etc/nginx/nginx.conf
+# Copy built app
+COPY --from=builder /app/build /usr/share/nginx/html
+
+# Copy nginx config (corrigido)
+COPY ./nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 3000
 
