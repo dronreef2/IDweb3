@@ -21,8 +21,8 @@ FROM nginx:alpine
 # Copy built app
 COPY --from=builder /app/build /usr/share/nginx/html
 
-# Copy nginx config (corrigido)
-COPY ./nginx.conf /etc/nginx/nginx.conf
+# Copy nginx config
+COPY nginx.conf /etc/nginx/nginx.conf
 
 EXPOSE 3000
 
