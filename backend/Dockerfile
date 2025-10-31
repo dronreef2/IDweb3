@@ -1,5 +1,8 @@
 FROM node:18-alpine
 
+# Install build dependencies for native modules (bcrypt, etc)
+RUN apk add --no-cache python3 make g++
+
 WORKDIR /app
 
 # Copy package files
@@ -12,11 +15,10 @@ RUN npm ci --only=production
 COPY backend/src/ ./src/
 
 # Create non-root user
-RUN addgroup -g 1001 -S nodejs
-RUN adduser -S idweb3 -u 1001
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S idweb3 -u 1001 && \
+    chown -R idweb3:nodejs /app
 
-# Change ownership of the app directory
-RUN chown -R idweb3:nodejs /app
 USER idweb3
 
 # Expose port
