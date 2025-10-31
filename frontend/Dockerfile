@@ -8,6 +8,9 @@ COPY frontend/package*.json ./
 # Install dependencies (using npm install since package-lock.json doesn't exist)
 RUN npm install
 
+# Copy index.html to public directory
+COPY frontend/index.html ./public/index.html
+
 # Copy source code (removed public/ since it doesn't exist)
 COPY frontend/src/ ./src/
 
