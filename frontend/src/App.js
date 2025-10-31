@@ -25,6 +25,7 @@ const theme = createTheme({
     },
   },
 });
+const API_URL = 'https://idweb3-y8qpxt.sliplane.app';
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -34,7 +35,7 @@ function App() {
     // Check API status
     const checkAPI = async () => {
       try {
-        const response = await fetch('http://localhost:3001/health');
+        const response = await fetch(`${API_URL}/health`);
         const data = await response.json();
         setApiStatus(data);
       } catch (error) {
@@ -171,7 +172,7 @@ function App() {
                   </Button>
                   <Button 
                     variant="outlined"
-                    href="http://localhost:3001/health"
+                    href={`${API_URL}/health`}
                     target="_blank"
                   >
                     API Health Check
