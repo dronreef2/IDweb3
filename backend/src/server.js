@@ -11,12 +11,25 @@ const PORT = process.env.APP_PORT || 3001;
 const HOST = '0.0.0.0';
 
 app.use(helmet());
+
+// CORS Configuration
+// Allows the frontend origin to access the API
+// Set CORS_ORIGIN='*' in environment to allow all origins (for testing only)
+const corsOrigin = process.env.CORS_ORIGIN === '*' 
+  ? '*' 
+  : process.env.CORS_ORIGIN || 'https://idweb3.sliplane.app';
+
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' ? 
-    process.env.FRONTEND_URL : 
-    ['http://localhost:3000', 'http://localhost:3003'],
-  credentials: true
+  origin: corsOrigin,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  exposedHeaders: ['Content-Range', 'X-Content-Range'],
+  optionsSuccessStatus: 200
 }));
+
+// Explicit OPTIONS handler for preflight requests
+app.options('*', cors());
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
