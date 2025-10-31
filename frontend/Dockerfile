@@ -8,8 +8,7 @@ COPY frontend/package*.json ./
 # Install dependencies
 RUN npm ci
 
-# Copy source code
-COPY frontend/public/ ./public/
+# Copy source code (removed public/ since it doesn't exist)
 COPY frontend/src/ ./src/
 
 # Build the app
